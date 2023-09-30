@@ -2,8 +2,12 @@
 
 import 'dart:io';
 
+import 'package:fic4_flutter_auth_bloc/bloc/product/create_product/create_product_bloc.dart';
+import 'package:fic4_flutter_auth_bloc/bloc/product/get_all_product/get_all_product_bloc.dart';
+import 'package:fic4_flutter_auth_bloc/data/models/request/product_model.dart';
 import 'package:fic4_flutter_auth_bloc/presentation/pages/category_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateNewProductScreen extends StatefulWidget {
@@ -201,25 +205,63 @@ class _CreateNewProductScreenState extends State<CreateNewProductScreen> {
               const SizedBox(
                 height: 16,
               ),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Submit',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              BlocConsumer<CreateProductBloc, CreateProductState>(
+                listener: (context, state) {
+                  if (state is CreateProductLoaded) {
+                    final productId = state.productResponseModel.id;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Product created with ID: $productId'),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  } else if (state is CreateProductError) {
+                    final errorMessage = state.errorMessage;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $errorMessage')),
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state is CreateProductLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  return ElevatedButton(
+                    onPressed: () {
+                      final productModel = ProductModel(
+                        title: titleController.text,
+                        price: int.parse(priceController.text),
+                        description: descriptionController.text,
+                      );
+                      context.read<CreateProductBloc>().add(
+                            DoCreateProductEvent(productModel: productModel),
+                          );
+                      Navigator.pop(context);
+                      context
+                          .read<GetAllProductBloc>()
+                          .add(DoGetAllProductEvent());
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                     ),
-                  ),
-                ),
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
               const SizedBox(
                 height: 16,

@@ -4,7 +4,7 @@ import 'dart:convert';
 //   "title": "New Product",
 //   "price": 100,
 //   "description": "A description",
-//   "categoryId": 1,
+//   "CategoryName": "Fashion",
 //   "images": [
 //     "https://placeimg.com/640/480/any"
 //   ]

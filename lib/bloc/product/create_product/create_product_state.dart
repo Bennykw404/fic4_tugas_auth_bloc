@@ -13,3 +13,10 @@ class CreateProductLoaded extends CreateProductState {
     required this.productResponseModel,
   });
 }
+
+class CreateProductError extends CreateProductState {
+  final String errorMessage;
+  CreateProductError({
+    required this.errorMessage,
+  });
+}

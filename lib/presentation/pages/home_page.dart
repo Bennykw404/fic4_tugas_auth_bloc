@@ -3,6 +3,7 @@ import 'package:fic4_flutter_auth_bloc/bloc/profile/profile_bloc.dart';
 import 'package:fic4_flutter_auth_bloc/data/localsources/auth_local_storage.dart';
 import 'package:fic4_flutter_auth_bloc/presentation/pages/create_new_product_screen.dart';
 import 'package:fic4_flutter_auth_bloc/presentation/pages/detail_product_screen.dart';
+import 'package:fic4_flutter_auth_bloc/presentation/pages/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -67,27 +68,46 @@ class _HomePageState extends State<HomePage> {
           children: [
             SizedBox(
               height: 130,
-              child: DrawerHeader(
-                margin: const EdgeInsets.all(0),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(0),
-                  leading: const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: NetworkImage(
-                        "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"),
-                  ),
-                  title: const Text(
-                    "Muhamad Syabaini",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: const Text(
-                    "View Profile",
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  onTap: () {},
-                ),
+              child: BlocBuilder<ProfileBloc, ProfileState>(
+                builder: (context, state) {
+                  if (state is ProfileLoaded) {
+                    return DrawerHeader(
+                      margin: const EdgeInsets.all(0),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.all(0),
+                        leading: CircleAvatar(
+                          radius: 30,
+                          backgroundImage: NetworkImage(state.profile.avatar ??
+                              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"),
+                        ),
+                        title: Text(
+                          state.profile.name ?? "Name Not Available",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: const Text(
+                          "View Profile",
+                          style: TextStyle(
+                            color: Colors.grey,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return const ProfileScreen();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  } else {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                },
               ),
             ),
             Expanded(
@@ -130,7 +150,7 @@ class _HomePageState extends State<HomePage> {
           }
           if (state is GetALlProductLoaded) {
             return ListView.separated(
-              itemCount: 10,
+              itemCount: state.listProduct.length,
               shrinkWrap: true,
               physics: const ScrollPhysics(),
               padding: const EdgeInsets.all(16),
